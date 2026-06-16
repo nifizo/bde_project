@@ -128,9 +128,50 @@ def submit_post(
 
 
     #########################
-    # add your code here
-    #########################
+    # T1: Do not publish posts whose expertise area is negatively marked
+    # in the author's existing fame profile.
+    for area_info in _expertise_areas:
+        area = area_info["expertise_area"]
 
+        if Fame.objects.filter(
+            user=user,
+            expertise_area=area,
+            fame_level__numeric_value__lt=0,
+        ).exists():
+            post.published = False
+            break
+    #########################
+    # T2: Apply penalties for expertise areas with negative truth ratings.
+    for area_info in _expertise_areas:
+        area = area_info["expertise_area"]
+        truth_rating = area_info["truth_rating"]
+
+        if truth_rating is None or truth_rating.numeric_value >= 0:
+            continue
+
+        try:
+            fame_entry = Fame.objects.get(user=user, expertise_area=area)
+        except Fame.DoesNotExist:
+            confuser_level = FameLevels.objects.get(name="Confuser")
+            Fame.objects.create(
+                user=user,
+                expertise_area=area,
+                fame_level=confuser_level,
+            )
+            continue
+
+        try:
+            fame_entry.fame_level = fame_entry.fame_level.get_next_lower_fame_level()
+            fame_entry.save()
+        except ValueError:
+            user.is_active = False
+            user.is_banned = True
+            user.save()
+
+            Posts.objects.filter(author=user).update(published=False)
+
+            redirect_to_logout = True
+            post.published = False
     post.save()
 
     return (
@@ -190,7 +231,34 @@ def bullshitters():
     """
     pass
     #########################
-    # add your code here
+
+
+    by_area = {}
+
+    entries = Fame.objects.filter(
+        fame_level__numeric_value__lt=0
+    ).select_related("user", "expertise_area", "fame_level")
+
+    for entry in entries:
+        area = entry.expertise_area
+
+        if area not in by_area:
+            by_area[area] = []
+
+        by_area[area].append({
+            "user": entry.user,
+            "fame_level_numeric": entry.fame_level.numeric_value,
+        })
+
+    for area in by_area:
+        by_area[area].sort(
+            key=lambda item: (
+                item["fame_level_numeric"],
+                -item["user"].date_joined.timestamp(),
+            )
+        )
+
+    return by_area
     #########################
 
 
