@@ -29,11 +29,10 @@ def timeline(user: SocialNetworkUsers, start: int = 0, end: int = None, publishe
         # 2. the user is a member of the community
         # 3. the post contains the community’s expertise area
         # 4. the post is published or the user is the author
-
-        pass
-        #########################
-        # add your code here
-        #########################
+        all_comms = user.communities.all()
+        posts = Posts.objects.filter(
+            expertise_area_and_truth_ratings__in=all_comms, author__communities=F("expertise_area_and_truth_ratings")
+        ).filter(Q(published=published) | Q(author=user)).distinct().order_by("-submitted")
 
     else:
         # in standard mode, posts of followed users are displayed
