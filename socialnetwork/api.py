@@ -129,7 +129,38 @@ def submit_post(
 
 
     #########################
-    # add your code here
+
+    ######### Task 2
+    confuser = FameLevels.objects.get(name="Confuser")
+    for expertise in _expertise_areas:
+
+        ex_area = expertise["expertise_area"]
+        tr_rating = expertise["truth_rating"]
+        ##### TAsk 2 part a
+        if tr_rating is None or tr_rating.numeric_value >= 0:
+            continue
+
+        #### Task 2 part b
+        fame_entry = Fame.objects.filter(
+            user=user,
+            expertise_area=ex_area,
+        ).first()
+        if fame_entry is None:
+            Fame.objects.create(user=user, expertise_area=ex_area, fame_level=confuser)
+            continue
+
+        ### Task 2 part c 
+        lower_level = (FameLevels.objects.filter(numeric_value__lt=fame_entry.fame_level.numeric_value).first())
+        if lower_level is None:
+            user.is_active = False
+            user.save(update_fields=["is_active"])
+            Posts.objects.filter(author=user).update(published=False)
+            post.published = False
+            redirect_to_logout = True
+            break
+        fame_entry.fame_level = lower_level
+        fame_entry.save(update_fields=["fame_level"])
+    ######### Task 4
     #########################
 
     post.save()
