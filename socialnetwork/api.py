@@ -1,3 +1,5 @@
+from sqlite3 import IntegrityError
+
 from django.db.models import Q, Exists, OuterRef, When, IntegerField, FloatField, Count, ExpressionWrapper, Case, Value, F, Prefetch
 
 from fame.models import Fame, FameLevels, FameUsers, ExpertiseAreas
@@ -201,19 +203,15 @@ def join_community(user: SocialNetworkUsers, community: ExpertiseAreas):
     """Join a specified community. Note that this method does not check whether the user is eligible for joining the
     community.
     """
-    pass
-    #########################
-    # add your code here
-    #########################
+    user.communities.add(community)
+
+
 
 
 
 def leave_community(user: SocialNetworkUsers, community: ExpertiseAreas):
     """Leave a specified community."""
-    pass
-    #########################
-    # add your code here
-    #########################
+    user.communities.remove(community)
 
 
 
