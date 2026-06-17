@@ -28,10 +28,10 @@ def timeline(user: SocialNetworkUsers, start: int = 0, end: int = None, publishe
         # 3. the post contains the community’s expertise area
         # 4. the post is published or the user is the author
 
-        pass
-        #########################
-        # add your code here
-        #########################
+        all_comms = user.communities.all()
+        posts = Posts.objects.filter(
+            expertise_area_and_truth_ratings__in=all_comms, author__communities=F("expertise_area_and_truth_ratings")
+        ).filter(Q(published=published) | Q(author=user)).distinct().order_by("-submitted")
 
     else:
         # in standard mode, posts of followed users are displayed
@@ -229,10 +229,6 @@ def bullshitters():
     users with the lowest fame are shown first, in case there is a tie, within that tie sort by date_joined
     (most recent first). Note that expertise areas with no expert may be omitted.
     """
-    pass
-    #########################
-
-
     by_area = {}
 
     entries = Fame.objects.filter(
@@ -269,19 +265,13 @@ def join_community(user: SocialNetworkUsers, community: ExpertiseAreas):
     """Join a specified community. Note that this method does not check whether the user is eligible for joining the
     community.
     """
-    pass
-    #########################
-    # add your code here
-    #########################
+    user.communities.add(community)
 
 
 
 def leave_community(user: SocialNetworkUsers, community: ExpertiseAreas):
     """Leave a specified community."""
-    pass
-    #########################
-    # add your code here
-    #########################
+    user.communities.remove(community)
 
 
 
