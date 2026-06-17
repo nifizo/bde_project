@@ -163,6 +163,9 @@ def submit_post(
         try:
             fame_entry.fame_level = fame_entry.fame_level.get_next_lower_fame_level()
             fame_entry.save()
+            super_pro_level = FameLevels.objects.get(name="Super Pro")
+            if fame_entry.fame_level.numeric_value < super_pro_level.numeric_value:
+                user.communities.remove(area)
         except ValueError:
             user.is_active = False
             user.is_banned = True
