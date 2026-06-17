@@ -286,6 +286,7 @@ def similar_users(user: SocialNetworkUsers):
     """Compute the similarity of user with all other users. The method returns a QuerySet of FameUsers annotated
     with an additional field 'similarity'. Sort the result in descending order according to 'similarity', in case
     there is a tie, within that tie sort by date_joined (most recent first)"""
+
     user_fame_entries = Fame.objects.filter(user = user)
 
     user_fame_dict = {} # key: expertise_area_id, value: numeric_value of the fame level
@@ -295,6 +296,9 @@ def similar_users(user: SocialNetworkUsers):
 
         user_fame_dict[expertise_area_id] = numeric_value
 
+    # Load users first, then fetch all related Fame objects with their FameLevel
+    # in one additional query. Django associates the Fame objects with the
+    # corresponding users in memory, avoiding a database query per user.
     other_users = (
         SocialNetworkUsers.objects
         .exclude(id=user.id)
@@ -306,10 +310,11 @@ def similar_users(user: SocialNetworkUsers):
         )
     )
 
-    if not user_fame_dict:
+    # If user_fame_dict return empty QuerySet 
+    if not user_fame_dict:                          
         return SocialNetworkUsers.objects.none()
 
-    similarity_scores  = {} # key: user_id, value: similarity score
+    similarity_scores  = {} # key: user_id, value: similarity_score
 
     for other_user in other_users:
         matching_expertise_areas = 0
@@ -317,23 +322,32 @@ def similar_users(user: SocialNetworkUsers):
         for fame_entry in other_user.fame_set.all():
             user_numeric_value = user_fame_dict.get(fame_entry.expertise_area_id)
 
+            # is None because the user could have a zero score for that expertise area
             if user_numeric_value is None:
                 continue
 
+            # abs = absolute 
             difference = abs(
                 user_numeric_value - fame_entry.fame_level.numeric_value
             )
 
             if difference <= 100:
                 matching_expertise_areas += 1
+        # End fame entries loop
 
-        if similarity <= 0:
+        if matching_expertise_areas == 0:
             continue
 
-        similarity = similarity / len(user_fame_dict)
+        similarity = matching_expertise_areas / len(user_fame_dict)
         similarity_scores[other_user.id] = similarity
+    # End other users loop
     
-    
+    # Example in SQL
+    # CASE 
+    #     WHEN id = 2 THEN 0.5
+    #     WHEN id = 3 THEN 0.3
+    #     ELSE NULL
+    # END
     similarity_annotation = Case(
         *[
             When(id=user_id, then=Value(score))
