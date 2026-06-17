@@ -286,3 +286,66 @@ def similar_users(user: SocialNetworkUsers):
     """Compute the similarity of user with all other users. The method returns a QuerySet of FameUsers annotated
     with an additional field 'similarity'. Sort the result in descending order according to 'similarity', in case
     there is a tie, within that tie sort by date_joined (most recent first)"""
+    user_fame_entries = Fame.objects.filter(user = user)
+
+    user_fame_dict = {} # key: expertise_area_id, value: numeric_value of the fame level
+    for fame_entry in user_fame_entries: 
+        expertise_area_id = fame_entry.expertise_area_id
+        numeric_value = fame_entry.fame_level.numeric_value
+
+        user_fame_dict[expertise_area_id] = numeric_value
+
+    other_users = (
+        SocialNetworkUsers.objects
+        .exclude(id=user.id)
+        .prefetch_related(
+            Prefetch(
+                "fame_set",
+                queryset=Fame.objects.select_related("fame_level"),
+            )
+        )
+    )
+
+    if not user_fame_dict:
+        return SocialNetworkUsers.objects.none()
+
+    similarity_scores  = {} # key: user_id, value: similarity score
+
+    for other_user in other_users:
+        matching_expertise_areas = 0
+
+        for fame_entry in other_user.fame_set.all():
+            user_numeric_value = user_fame_dict.get(fame_entry.expertise_area_id)
+
+            if user_numeric_value is None:
+                continue
+
+            difference = abs(
+                user_numeric_value - fame_entry.fame_level.numeric_value
+            )
+
+            if difference <= 100:
+                matching_expertise_areas += 1
+
+        if similarity <= 0:
+            continue
+
+        similarity = similarity / len(user_fame_dict)
+        similarity_scores[other_user.id] = similarity
+    
+    
+    similarity_annotation = Case(
+        *[
+            When(id=user_id, then=Value(score))
+            for user_id, score in similarity_scores.items()
+        ],
+        output_field=FloatField(),
+    )
+
+    return (
+        SocialNetworkUsers.objects
+        .filter(id__in=similarity_scores.keys())
+        .annotate(similarity=similarity_annotation)
+        .order_by("-similarity", "-date_joined")
+    )
+    

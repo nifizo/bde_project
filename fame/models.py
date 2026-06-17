@@ -87,7 +87,6 @@ class Fame(models.Model):
     """Fame of a user in a specific expertise area.
     intermediary table between FameUsers and ExpertiseAreas.
     """
-
     user = models.ForeignKey(FameUsers, on_delete=models.CASCADE)
     expertise_area = models.ForeignKey(ExpertiseAreas, on_delete=models.CASCADE)
     fame_level = models.ForeignKey(FameLevels, on_delete=models.CASCADE)
