@@ -149,6 +149,7 @@ def submit_post(
         if truth_rating is None or truth_rating.numeric_value >= 0:
             continue
 
+        ######T2b
         try:
             fame_entry = Fame.objects.get(user=user, expertise_area=area)
         except Fame.DoesNotExist:
@@ -161,12 +162,15 @@ def submit_post(
             continue
 
         try:
+            #### T2a
             fame_entry.fame_level = fame_entry.fame_level.get_next_lower_fame_level()
             fame_entry.save()
+            #### T4 last
             super_pro_level = FameLevels.objects.get(name="Super Pro")
             if fame_entry.fame_level.numeric_value < super_pro_level.numeric_value:
                 user.communities.remove(area)
         except ValueError:
+            ##### T2c
             user.is_active = False
             user.is_banned = True
             user.save()
