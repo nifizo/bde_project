@@ -296,6 +296,10 @@ def similar_users(user: SocialNetworkUsers):
 
         user_fame_dict[expertise_area_id] = numeric_value
 
+    # If user_fame_dict return empty QuerySet 
+    if not user_fame_dict:                          
+        return SocialNetworkUsers.objects.none()
+
     # Load users first, then fetch all related Fame objects with their FameLevel
     # in one additional query. Django associates the Fame objects with the
     # corresponding users in memory, avoiding a database query per user.
@@ -309,10 +313,6 @@ def similar_users(user: SocialNetworkUsers):
             )
         )
     )
-
-    # If user_fame_dict return empty QuerySet 
-    if not user_fame_dict:                          
-        return SocialNetworkUsers.objects.none()
 
     similarity_scores  = {} # key: user_id, value: similarity_score
 
