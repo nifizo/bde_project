@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Similar Users</h1>
+
+{% if similar_users %}
+<ul>
+    {% for user in similar_users %}
+    <li>
+        {{ user.username }} — Similarity: {{ user.similarity }}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No similar users found.</p>
+{% endif %}
+
+<a href="{% url 'sn:timeline' %}">Back to timeline</a>
+{% endblock %}
