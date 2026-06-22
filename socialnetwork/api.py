@@ -17,7 +17,7 @@ def _get_social_network_user(user) -> SocialNetworkUsers:
     return user
 
 
-def timeline(user: SocialNetworkUsers, start: int = 0, end: int = None, published=True, community_mode=False):
+def timeline(user: SocialNetworkUsers, start: int = 0, end: int = None, published=True, community_mode = False):
     """Get the timeline of the user. Assumes that the user is authenticated."""
 
     if community_mode:

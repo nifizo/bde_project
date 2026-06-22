@@ -26,11 +26,68 @@
     </form>
 </div>
 <br>
+
 <div style="margin-left: 40px; margin-right: 40px; margin-bottom: 20px;">
-    <a href="{% url 'sn:similar_users' %}" class="btn btn-secondary">
-        Show Similar Users
-    </a>
+    <form method="post" action="{% url 'sn:toggle_community_mode' %}">
+        {% csrf_token %}
+        {% if community_mode %}
+            <button type="submit" class="btn btn-secondary">
+                Switch to standard mode
+            </button>
+        {% else %}
+            <button type="submit" class="btn btn-primary">
+                Switch to community mode
+            </button>
+        {% endif %}
+    </form>
+    <br>
+    <h5>Your communities</h5>
+
+    {% for community in joined_communities %}
+        <div style="margin-bottom: 10px;">
+            {{ community }}
+            <form method="post"
+                  action="{% url 'sn:leave_community' %}"
+                  style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden"
+                       name="expertise_area_id"
+                       value="{{ community.id }}">
+                <button type="submit"
+                        class="btn btn-outline-danger btn-sm">
+                    Leave
+                </button>
+            </form>
+        </div>
+
+    {% empty %}
+        <p>You have not joined any communities.</p>
+    {% endfor %}
+
+    <h5>Available communities</h5>
+    {% for community in available_communities %}
+        <div style="margin-bottom: 10px;">
+            {{ community }}
+            <form method="post"
+                  action="{% url 'sn:join_community' %}"
+                  style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden"
+                       name="expertise_area_id"
+                       value="{{ community.id }}">
+
+                <button type="submit"
+                        class="btn btn-success btn-sm">
+                    Join
+                </button>
+            </form>
+        </div>
+
+    {% empty %}
+        <p>No communities are available.</p>
+    {% endfor %}
 </div>
+
 <br>
 <br>
 <h3 style="margin-left: 40px">Timeline</h3>
