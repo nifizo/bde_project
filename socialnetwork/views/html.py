@@ -74,7 +74,12 @@ def unfollow(request):
 @require_http_methods(["GET"])
 @login_required
 def bullshitters(request):
-    raise NotImplementedError("Not implemented yet")
+    user = _get_social_network_user(request.user)
+    bullshitters = api.bullshitters()
+    context = {
+        "bullshitters": bullshitters,
+    }
+    return render(request, "bullshitters.html", context = context)
 
 @require_http_methods(["POST"])
 @login_required

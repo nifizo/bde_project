@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Bullshitters{% endblock %}
+
+{% block body %}
+
+    <div class="px-5 py-4">
+
+        <div class="mb-4">
+            <h2>Bullshitters</h2>
+            <p class="text-muted">
+                Users with negative fame grouped by expertise area.
+            </p>
+
+        </div>
+
+        {% if bullshitters %}
+            {% for expertise_area, users in bullshitters.items %}
+                <div class="mb-5">
+                    <h4 class="mb-3">
+                        {{ expertise_area }}
+                    </h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle w-100">
+                            <thead class="table-dark">
+                            <tr>
+                                <th style="width: 50%;">User</th>
+                                <th style="width: 25%;">Fame Value</th>
+                                <th style="width: 25%;">Fame Profile</th>
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+                            {% for entry in users %}
+                                <tr>
+                                    <td class="py-3">
+                                        <strong>
+                                            {{ entry.user.first_name }}
+                                            {{ entry.user.last_name }}
+                                        </strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ entry.user.email }}
+                                        </small>
+                                    </td>
+                                    <td class="py-3">
+                                        {{ entry.fame_level_numeric }}
+                                    </td>
+                                    <td class="py-3">
+                                        <a
+                                                href="/fame/html/fame?userid={{ entry.user.id }}"
+                                                class="btn btn-outline-secondary btn-sm"
+                                        >
+                                            View Profile
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="alert alert-info">
+                No users with negative fame found.
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

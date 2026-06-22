@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e126152d-876d-43c8-badc-cfee2b41725c" name="Changes" comment="" />
+    <list default="true" id="e126152d-876d-43c8-badc-cfee2b41725c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/famesocialnetwork/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/famesocialnetwork/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socialnetwork/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/socialnetwork/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socialnetwork/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/socialnetwork/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socialnetwork/views/html.py" beforeDir="false" afterPath="$PROJECT_DIR$/socialnetwork/views/html.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -21,6 +35,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -29,7 +44,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
-    "git-widget-placeholder": "johannes",
+    "git-widget-placeholder": "main",
     "last_opened_file_path": "/Users/vas/study/bde/export",
     "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"

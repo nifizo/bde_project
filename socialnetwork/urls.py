@@ -5,10 +5,12 @@ from socialnetwork.views.html import follow
 from socialnetwork.views.html import unfollow
 from socialnetwork.views.rest import PostsListApiView
 from socialnetwork.views.html import similar_users
+from socialnetwork.views.html import bullshitters
 
 app_name = "socialnetwork"
 
 urlpatterns = [
+    path("html/bullshitters", bullshitters, name="bullshitters"),
     path("api/posts", PostsListApiView.as_view(), name="posts_fulllist"),
     path("html/timeline", timeline, name="timeline"),
     path("api/follow", follow, name="follow"),
