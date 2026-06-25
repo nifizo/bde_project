@@ -1,49 +1,139 @@
 {% extends "base.html" %}
 
+<!--
+This template inherits the layout from base.html.
+Everything defined in base.html (navigation, CSS, footer, etc.)
+is reused here.
+-->
+
 {% block title %}Similar Users{% endblock %}
 
+<!--
+Sets the page title that will appear in the browser tab.
+This replaces the "title" block inside base.html.
+-->
+
 {% block body %}
+<!--
+Everything inside this block becomes the page content.
+-->
 
 <div class="px-5 py-4">
+<!--
+Bootstrap spacing classes: px-5 = horizontal padding, py-4 = vertical padding
+-->
 
     <div class="mb-4">
+         <!--
+        Adds a bottom margin to separate the heading from the table below.
+        -->
+
         <h2>Similar Users</h2>
+
         <p class="text-muted">
+              <!--
+            Small description shown below the heading text-muted displays the text in a lighter color.
+            -->
+
             These users have a similar fame profile based on your expertise areas.
         </p>
     </div>
 
     {% if similar_users %}
+    <!--
+    Django checks whether the variable "similar_users" contains any users.
+
+    If it is not empty → display the table
+
+    Otherwise → display the "No similar users found" message.
+    -->
 
     <div class="table-responsive">
+         <!--
+        Makes the table responsive. On small screens it becomes horizontally scrollable.
+        -->
+
         <table class="table table-striped table-hover align-middle w-100">
+            <!--
+            Bootstrap table classes:
+
+            table          = basic Bootstrap styling
+            table-striped  = alternating row colors
+            table-hover    = highlight row when hovering
+            align-middle   = vertically center all cells
+            w-100          = use the full available width
+            -->
+
             <thead class="table-dark">
+                <!--
+                Creates the table header with a dark background.
+                -->
+
                 <tr>
+                     <!-- Table row -->
                     <th style="width: 55%;">User</th>
+                    <!-- First column -->
                     <th style="width: 20%;">Similarity</th>
+                     <!-- Second column -->
                     <th style="width: 25%;">Fame Profile</th>
+                    <!-- Third column -->
                 </tr>
             </thead>
 
             <tbody>
+             <!--
+                Table body containing one row per similar user.
+                -->
+
                 {% for similar_user in similar_users %}
+                <!--
+                Loop over every object inside the QuerySet "similar_users" that was passed from the view.
+
+                Each iteration creates one table row.
+                -->
                 <tr>
                     <td class="py-3">
+                        <!--
+                        First column: User information.
+                        -->
+
                         <strong>
+                            <!--
+                            Display first and last name in bold.
+                            -->
                             {{ similar_user.first_name }} {{ similar_user.last_name }}
                         </strong>
                         <br>
                         <small class="text-muted">
                             {{ similar_user.email }}
+                               <!--
+                            Display the user's email below the name.
+                            with a muted text
+                            -->
                         </small>
                     </td>
 
                     <td class="py-3">
+                        <!--
+                        Second column: Display the similarity score.
+
+                        floatformat:2 formats the number to exactly two decimal places.
+
+                        Example: 0.857142857 becomes 0.86
+                        -->
                         {{ similar_user.similarity|floatformat:2 }}
                     </td>
 
                     <td class="py-3">
+                        <!--
+                        Third column:Button linking to the user's fame profile.
+                        -->
                         <a href="/fame/html/fame?userid={{ similar_user.id }}" class="btn btn-outline-secondary btn-sm">
+                            <!--
+                            The user's id is inserted into the URL.
+
+                            Example: /fame/html/fame?userid=17
+                            -->
                             View Profile
                         </a>
                     </td>

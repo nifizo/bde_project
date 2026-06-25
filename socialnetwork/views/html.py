@@ -139,11 +139,26 @@ def leave_community(request):
 @require_http_methods(["GET"])
 @login_required
 def similar_users(request):
+
+    # Convert Django's built-in User object (request.user)
+    # into the corresponding SocialNetworkUser object.
+    # We need this because the API works with SocialNetworkUser objects.
     user = _get_social_network_user(request.user)
+
+    # Call the API function that calculates all similar users.
+    # The result is usually a QuerySet containing all users
+    # together with their calculated similarity score.
     similar_users_result = api.similar_users(user)
 
+    # Create a context dictionary.
+    # Everything inside this dictionary will be available
+    # inside the HTML template.
     context = {
         "similar_users": similar_users_result,
     }
 
+    # Render the HTML template "similar_users.html"
+    # and pass the context dictionary to it.
+    # Django replaces all template variables with the values
+    # from the context before sending the finished HTML page back to the browser.
     return render(request, "similar_users.html", context = context)
