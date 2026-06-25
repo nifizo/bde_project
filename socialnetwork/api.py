@@ -287,22 +287,31 @@ def similar_users(user: SocialNetworkUsers):
     with an additional field 'similarity'. Sort the result in descending order according to 'similarity', in case
     there is a tie, within that tie sort by date_joined (most recent first)"""
 
+    # load all fame entries of the given user
+    # each entry connects the user with one expertise area and one fame level 
     user_fame_entries = Fame.objects.filter(user = user)
 
+    # create dict that stores the given user's fame values later
     user_fame_dict = {} # key: expertise_area_id, value: numeric_value of the fame level
+
+    # loop over each entry in the created dict
     for fame_entry in user_fame_entries: 
+        # use the foreign key relationship to get the needed data
         expertise_area_id = fame_entry.expertise_area_id
         numeric_value = fame_entry.fame_level.numeric_value
 
         user_fame_dict[expertise_area_id] = numeric_value
 
-    # If user_fame_dict return empty QuerySet 
+    # if the given user has no fame entries, similarity cannot be calculated
+    # return an empty QuerySet because the Task expects a QuerySet as a result
     if not user_fame_dict:                          
         return SocialNetworkUsers.objects.none()
 
-    # Load users first, then fetch all related Fame objects with their FameLevel
-    # in one additional query. Django associates the Fame objects with the
-    # corresponding users in memory, avoiding a database query per user.
+    # load all other users
+    # exclude the given user 
+    # prefetch_related loads all related Fame entries for these users efficiently
+    # select_related("fame_level") additionally loads the FameLevel of each Fame entry
+    # This avoids many small database queries inside a loop
     other_users = (
         SocialNetworkUsers.objects
         .exclude(id=user.id)
@@ -314,40 +323,47 @@ def similar_users(user: SocialNetworkUsers):
         )
     )
 
+    # store calculated similarity scores temporarily in the dict
     similarity_scores  = {} # key: user_id, value: similarity_score
 
+    # compare the given user with every other user.
     for other_user in other_users:
-        matching_expertise_areas = 0
+        matching_expertise_areas = 0    # counter 
 
+        # loop over all fame entries of the other user.
         for fame_entry in other_user.fame_set.all():
+
+            # Check whether the given user has fame in the same expertise area.
+            # If yes, this returns the given user's numeric fame value.
+            # If no, this returns None.
             user_numeric_value = user_fame_dict.get(fame_entry.expertise_area_id)
 
-            # is None because the user could have a zero score for that expertise area
+            # if the given user does not have this expertise area, we ignore it
             if user_numeric_value is None:
                 continue
 
-            # abs = absolute 
+            # calculate the absolute difference between both numeric fame values.
             difference = abs(
                 user_numeric_value - fame_entry.fame_level.numeric_value
             )
 
+            # if the difference is at most 100, this expertise area counts as similar.
             if difference <= 100:
                 matching_expertise_areas += 1
         # End fame entries loop
 
+        # users with zero matching expertise areas have similarity score 0.
+        # the task says we should only return users with non-zero similarity.
         if matching_expertise_areas == 0:
             continue
 
+        # calculate similarity as similarity = matching expertise areas / number of expertise areas of the given user.
         similarity = matching_expertise_areas / len(user_fame_dict)
         similarity_scores[other_user.id] = similarity
     # End other users loop
     
-    # Example in SQL
-    # CASE 
-    #     WHEN id = 2 THEN 0.5
-    #     WHEN id = 3 THEN 0.3
-    #     ELSE NULL
-    # END
+    # convert the Python-calculated scores into a Django annotation.
+    # logic behind CASE: WHEN id = user_id THEN corresponding score.
     similarity_annotation = Case(
         *[
             When(id=user_id, then=Value(score))
@@ -356,6 +372,11 @@ def similar_users(user: SocialNetworkUsers):
         output_field=FloatField(),
     )
 
+    # Return a QuerySet of users with the additional field "similarity".
+    # Only users with a calculated similarity score are included.
+    # Sorting:
+    # 1. highest similarity first
+    # 2. if equal, newest user first
     return (
         SocialNetworkUsers.objects
         .filter(id__in=similarity_scores.keys())
