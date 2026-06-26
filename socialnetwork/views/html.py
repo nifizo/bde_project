@@ -107,6 +107,8 @@ def bullshitters(request):
 @require_http_methods(["POST"])
 @login_required
 def toggle_community_mode(request):
+    # changing variable community mode in session and redirecting to timeline
+    # to go into another if branch in timeline
     current_mode = request.session.get("community_mode", False)
     request.session["community_mode"] = not current_mode
     return redirect(reverse("sn:timeline"))
@@ -114,24 +116,28 @@ def toggle_community_mode(request):
 @require_http_methods(["POST"])
 @login_required
 def join_community(request):
+    #Get user and exepertise area id
     user = _get_social_network_user(request.user)
     expertise_area_id = request.POST.get("expertise_area_id")
     expertise_area = get_object_or_404(
         ExpertiseAreas,
         id=expertise_area_id,
     )
+    # using api and redirecting again to timeline
     api.join_community(user, expertise_area)
     return redirect(reverse("sn:timeline"))
 
 @require_http_methods(["POST"])
 @login_required
 def leave_community(request):
+    #Get user and exepertise area id
     user = _get_social_network_user(request.user)
     expertise_area_id = request.POST.get("expertise_area_id")
     expertise_area = get_object_or_404(
         ExpertiseAreas,
         id=expertise_area_id,
     )
+    #using api and redirecting again to timeline
     api.leave_community(user, expertise_area)
     return redirect(reverse("sn:timeline"))
 

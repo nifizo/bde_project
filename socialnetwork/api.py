@@ -28,7 +28,12 @@ def timeline(user: SocialNetworkUsers, start: int = 0, end: int = None, publishe
         # 3. the post contains the community’s expertise area
         # 4. the post is published or the user is the author
 
+        #all communities of user
         all_comms = user.communities.all()
+        # Returns posts such that author is community member,
+        # expertise areas of posts are user's communities
+        # are published or written by current user
+        # filter by newest and unique
         posts = Posts.objects.filter(
             expertise_area_and_truth_ratings__in=all_comms, author__communities=F("expertise_area_and_truth_ratings")
         ).filter(Q(published=published) | Q(author=user)).distinct().order_by("-submitted")
