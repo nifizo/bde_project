@@ -130,49 +130,96 @@ def submit_post(
     #########################
     # T1: Do not publish posts whose expertise area is negatively marked
     # in the author's existing fame profile.
+    # Loop through every expertise area that the magic AI assigned to this post.
     for area_info in _expertise_areas:
+
+        # Extract the current ExpertiseArea object from the dictionary.
         area = area_info["expertise_area"]
 
+        # Check whether the author already has negative fame
+        # in this particular expertise area.
         if Fame.objects.filter(
-            user=user,
-            expertise_area=area,
-            fame_level__numeric_value__lt=0,
+            user=user,                        # Fame entry belongs to the post's author
+            expertise_area=area,             # Fame entry is for this expertise area
+            fame_level__numeric_value__lt=0, # Fame value is negative (< 0)
         ).exists():
+
+            # Do not publish the post if negative fame exists.
             post.published = False
+
+            # Stop checking because one negative expertise area
+            # is enough to block publication.
             break
     #########################
     # T2: Apply penalties for expertise areas with negative truth ratings.
+    # Process every expertise area assigned to the post by the magic AI.
     for area_info in _expertise_areas:
+
+        # Extract the expertise area and its associated truth rating.
         area = area_info["expertise_area"]
         truth_rating = area_info["truth_rating"]
 
+        # Ignore this expertise area if:
+        # 1. the AI could not determine a truth rating, or
+        # 2. the truth rating is non-negative.
+        # T2 penalties only apply to negative truth ratings.
         if truth_rating is None or truth_rating.numeric_value >= 0:
             continue
 
         try:
-            fame_entry = Fame.objects.get(user=user, expertise_area=area)
+            # Try to find an existing Fame entry for this user
+            # in the current expertise area.
+            fame_entry = Fame.objects.get(
+                user=user,
+                expertise_area=area
+            )
+
         except Fame.DoesNotExist:
+            # T2b:
+            # The user has no fame profile in this expertise area yet.
+            # Create a new Fame entry with the initial negative level "Confuser".
             confuser_level = FameLevels.objects.get(name="Confuser")
+
             Fame.objects.create(
                 user=user,
                 expertise_area=area,
                 fame_level=confuser_level,
             )
+
+            # The T2b case is fully handled, so move on to
+            # the next expertise area.
             continue
 
         try:
-            fame_entry.fame_level = fame_entry.fame_level.get_next_lower_fame_level()
+            # T2a:
+            # Lower the user's fame level by exactly one step.
+            fame_entry.fame_level = (
+                fame_entry.fame_level.get_next_lower_fame_level()
+            )
+
+            # Persist the updated fame level to the database.
             fame_entry.save()
+
         except ValueError:
+            # T2c:
+            # get_next_lower_fame_level() raises ValueError when
+            # the user is already at the lowest possible fame level.
+
+            # Ban the user and disable their account.
             user.is_active = False
             user.is_banned = True
             user.save()
 
-            Posts.objects.filter(author=user).update(published=False)
+            # Unpublish all posts previously made by this user.
+            Posts.objects.filter(author=user).update(
+                published=False
+            )
 
+            # Force the current request to log the user out.
             redirect_to_logout = True
+
+            # Also ensure the current post is unpublished.
             post.published = False
-    post.save()
 
     return (
         {"published": post.published, "id": post.id},
@@ -233,31 +280,58 @@ def bullshitters():
     #########################
 
 
+    # Dictionary that will map:
+    # ExpertiseArea -> list of users with negative fame in that area.
     by_area = {}
 
+    # Retrieve all Fame entries whose fame value is negative.
+    # select_related loads the related objects in the same query
+    # to avoid extra database lookups later.
     entries = Fame.objects.filter(
         fame_level__numeric_value__lt=0
-    ).select_related("user", "expertise_area", "fame_level")
+    ).select_related(
+        "user",
+        "expertise_area",
+        "fame_level"
+    )
 
+    # Process each negative Fame entry.
     for entry in entries:
+
+        # Get the expertise area associated with this Fame entry.
         area = entry.expertise_area
 
+        # If we have not seen this expertise area before,
+        # create an empty list for it in the dictionary.
         if area not in by_area:
             by_area[area] = []
 
+        # Add this user and their fame value to the list
+        # belonging to the expertise area.
         by_area[area].append({
             "user": entry.user,
             "fame_level_numeric": entry.fame_level.numeric_value,
         })
 
+    # Sort each expertise area's list according to the specification.
     for area in by_area:
+
         by_area[area].sort(
             key=lambda item: (
+
+                # Primary key:
+                # lower (more negative) fame values come first.
                 item["fame_level_numeric"],
+
+                # Secondary key:
+                # newer users come first if the fame values are equal.
+                # We negate the timestamp to reverse the order.
                 -item["user"].date_joined.timestamp(),
             )
         )
 
+    # Return the final dictionary:
+    # {expertise_area -> list of bullshitters}
     return by_area
     #########################
 
