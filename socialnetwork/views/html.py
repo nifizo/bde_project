@@ -132,7 +132,6 @@ def leave_community(request):
         ExpertiseAreas,
         id=expertise_area_id,
     )
-    api.join_community(user)
     api.leave_community(user, expertise_area)
     return redirect(reverse("sn:timeline"))
 
