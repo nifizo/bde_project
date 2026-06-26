@@ -4,6 +4,7 @@
     <list default="true" id="e126152d-876d-43c8-badc-cfee2b41725c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/socialnetwork/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/socialnetwork/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socialnetwork/templates/timeline.html" beforeDir="false" afterPath="$PROJECT_DIR$/socialnetwork/templates/timeline.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/socialnetwork/views/html.py" beforeDir="false" afterPath="$PROJECT_DIR$/socialnetwork/views/html.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -84,7 +85,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="a7d643ea-3116-4e27-939c-5860082e7777" name="Changes" comment="" />
+      <changelist id="e126152d-876d-43c8-badc-cfee2b41725c" name="Changes" comment="" />
       <created>1781622225509</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -92,6 +93,7 @@
       <workItem from="1781622226702" duration="2616000" />
       <workItem from="1781639842729" duration="4120000" />
       <workItem from="1781701646501" duration="1188000" />
+      <workItem from="1782484199116" duration="3235000" />
     </task>
     <servers />
   </component>

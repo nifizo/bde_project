@@ -21,16 +21,22 @@ def timeline(request):
     if 'community_mode' not in request.session:
         request.session['community_mode'] = False
 
+    # Getting current comm mode
     community_mode = request.session["community_mode"]
+    # Getting current user
     user = _get_social_network_user(request.user)
+    # All communities of the current user
     joined_communities = user.communities.all()
+    # Value of super pro level
     super_pro = FameLevels.objects.get(name="Super Pro")
+    # All areas where user is at least super pro level
     eligible_expertise_area_ids = Fame.objects.filter(
         user=user,
         fame_level__numeric_value__gte=super_pro.numeric_value,
     ).values_list(
         "expertise_area_id", flat=True,
     )
+    #All available communities for user without joined communities
     available_communities = ExpertiseAreas.objects.filter(
         id__in=eligible_expertise_area_ids,
     ).exclude(
@@ -42,6 +48,8 @@ def timeline(request):
     error = request.GET.get("error", None)
 
     # if keyword is not empty, use search method of API:
+
+    # added that all in context
     if keyword and keyword != "":
         context = {
             "posts": PostsSerializer(
@@ -98,19 +106,23 @@ def unfollow(request):
 @login_required
 def bullshitters(request):
     user = _get_social_network_user(request.user)
+    # getting all bullshitters
     bullshitters = api.bullshitters()
+    # putting them in context
     context = {
         "bullshitters": bullshitters,
     }
+    # rendering bullshitters view
     return render(request, "bullshitters.html", context = context)
 
 @require_http_methods(["POST"])
 @login_required
 def toggle_community_mode(request):
-    # changing variable community mode in session and redirecting to timeline
-    # to go into another if branch in timeline
+    # Get the current mode from the session. Standard mode is the default.
     current_mode = request.session.get("community_mode", False)
+    # Switch to the opposite timeline mode.
     request.session["community_mode"] = not current_mode
+    # Reload the timeline using the updated mode.
     return redirect(reverse("sn:timeline"))
 
 @require_http_methods(["POST"])
@@ -119,6 +131,7 @@ def join_community(request):
     #Get user and exepertise area id
     user = _get_social_network_user(request.user)
     expertise_area_id = request.POST.get("expertise_area_id")
+    # getting area by id if it exists
     expertise_area = get_object_or_404(
         ExpertiseAreas,
         id=expertise_area_id,
@@ -133,6 +146,7 @@ def leave_community(request):
     #Get user and exepertise area id
     user = _get_social_network_user(request.user)
     expertise_area_id = request.POST.get("expertise_area_id")
+    # getting area by id if it exists
     expertise_area = get_object_or_404(
         ExpertiseAreas,
         id=expertise_area_id,

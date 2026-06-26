@@ -27,6 +27,9 @@
 </div>
 <br>
 
+
+
+    <!-- Button Toggle to Community mode -->
 <div style="margin-left: 40px; margin-right: 40px; margin-bottom: 20px;">
     <form method="post" action="{% url 'sn:toggle_community_mode' %}">
         {% csrf_token %}
@@ -41,11 +44,14 @@
         {% endif %}
     </form>
     <br>
+
+<!-- Show all user's communities -->
     <h5>Your communities</h5>
 
     {% for community in joined_communities %}
         <div style="margin-bottom: 10px;">
             {{ community }}
+            <!-- For each community button to leave  -->
             <form method="post"
                   action="{% url 'sn:leave_community' %}"
                   style="display: inline;">
@@ -59,11 +65,11 @@
                 </button>
             </form>
         </div>
-
+<!-- if no joined communities -->
     {% empty %}
         <p>You have not joined any communities.</p>
     {% endfor %}
-
+<!--All available communities -->
     <h5>Available communities</h5>
     {% for community in available_communities %}
         <div style="margin-bottom: 10px;">
